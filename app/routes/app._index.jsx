@@ -358,45 +358,78 @@ export default function Index() {
       const data = await response.json();
 
       if (data.success) {
-        alert("Announcement Saved Successfully");
+        // alert("Announcement Saved Successfully");
+        shopify.toast.show(
+          "Announcement saved successfully 🎉"
+        );
       } else {
-        alert(data.error);
+      shopify.toast.show(
+  `Error: ${data.error}`
+);
       }
     } catch (error) {
       console.error(error);
-      alert("Something went wrong");
+      shopify.toast.show(
+  "Something went wrong"
+);
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <s-page heading="Announcement Dashboard">
-      <s-section heading="Create Announcement">
+ return (
+  <s-page heading="Announcement Dashboard">
+    <s-section heading="Create Announcement">
 
-        <div style={{ marginBottom: "20px" }}>
-          <label>Announcement Text</label>
+      <div
+        style={{
+          background: "#ffffff",
+          border: "1px solid #e5e7eb",
+          borderRadius: "12px",
+          padding: "20px",
+        }}
+      >
 
-          <textarea
-            value={announcement}
-            onChange={(e) => setAnnouncement(e.target.value)}
-            rows={5}
-            style={{
-              width: "100%",
-              padding: "10px",
-              marginTop: "10px",
-            }}
-          />
+        <div style={{ marginBottom: "8px" }}>
+          <strong>Announcement Text</strong>
         </div>
 
-        <s-button
-          onClick={saveAnnouncement}
-          loading={loading}
-        >
-          Save Announcement
-        </s-button>
+        <textarea
+          value={announcement}
+          onChange={(e) => setAnnouncement(e.target.value)}
+          rows={6}
+          placeholder="Enter your announcement..."
+          style={{
+            width: "100%",
+            padding: "14px",
+            fontSize: "15px",
+            border: "1px solid #d1d5db",
+            borderRadius: "10px",
+            resize: "vertical",
+            outline: "none",
+            boxSizing: "border-box",
+          }}
+        />
 
-      </s-section>
-    </s-page>
-  );
+        <div
+          style={{
+            marginTop: "16px",
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
+          <s-button
+            variant="primary"
+            onClick={saveAnnouncement}
+            loading={loading}
+          >
+            Save Announcement
+          </s-button>
+        </div>
+
+      </div>
+
+    </s-section>
+  </s-page>
+);
 }

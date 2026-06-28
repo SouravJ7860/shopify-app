@@ -1,31 +1,65 @@
 import Announcement from "../models/Announcement.server";
 import { connectDB } from "../mongodb.server";
+import { authenticate } from "../shopify.server";
 
 export async function action({ request }) {
   try {
-    console.log("STEP 1");
-
     const body = await request.json();
 
-    console.log("STEP 2", body);
-
     await connectDB();
-
-    console.log("STEP 3 Mongo Connected");
 
     const savedAnnouncement = await Announcement.create({
       text: body.text,
     });
 
-    console.log("STEP 4 Saved");
+    const { admin } = await authenticate.admin(request);
+
+    const response = await admin.graphql(
+      `#graphql
+      mutation SaveAnnouncement(
+        $ownerId: ID!,
+        $value: String!
+      ) {
+        metafieldsSet(
+          metafields: [
+            {
+              ownerId: $ownerId
+              namespace: "my_app"
+              key: "announcement"
+              type: "single_line_text_field"
+              value: $value
+            }
+          ]
+        ) {
+          metafields {
+            id
+            namespace
+            key
+            value
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+      `,
+      {
+        variables: {
+          ownerId: "gid://shopify/Shop/73671180399",
+          value: body.text,
+        },
+      }
+    );
+
+    const result = await response.json();
 
     return Response.json({
       success: true,
-      data: savedAnnouncement,
+      mongoData: savedAnnouncement,
+      metafieldData: result,
     });
   } catch (error) {
-    console.error("SAVE ERROR:", error);
-
     return Response.json({
       success: false,
       error: error.message,
